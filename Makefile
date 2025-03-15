@@ -5,3 +5,7 @@ test:
 .PHONY: run-dev
 run-dev:
 	pipenv run uvicorn app.main:app --reload
+
+.PHONY: up
+up:
+	docker-compose up --build
