@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    container_name: dtv_schedule_rss
+    ports:
+      - "8000:80"
