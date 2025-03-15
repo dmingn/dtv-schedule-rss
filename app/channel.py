@@ -18,7 +18,8 @@ class Program(BaseModel):
             title=self.title,
             link=self.url,
             description=self.description,
-            pub_date=self.start,
+            # to make pubDate in the past, subtract 7 days from start for convenience
+            pub_date=self.start - datetime.timedelta(days=7),
         )
 
 
