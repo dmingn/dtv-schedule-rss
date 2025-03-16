@@ -3,11 +3,12 @@ from xml.etree.ElementTree import tostring
 from fastapi import FastAPI, Response
 
 from app.channel import Channel
-from app.channels import nhk_e1_130, nhk_g1_130
+from app.channels import nhk_e1_130, nhk_g1_130, ntv
 
 path_to_channel: dict[str, Channel] = {
     "joak-dtv": nhk_g1_130,
     "joab-dtv": nhk_e1_130,
+    "joax-dtv": ntv,
 }
 
 
