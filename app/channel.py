@@ -17,7 +17,10 @@ class Program(BaseModel):
         return rss.Item(
             title=self.title,
             link=self.url,
-            description=self.description,
+            description="\n\n".join(
+                [self.start.strftime("%m/%d %H:%M")]
+                + ([self.description] if self.description else [])
+            ),
             # to make pubDate in the past, subtract 7 days from start for convenience
             pub_date=self.start - datetime.timedelta(days=7),
         )
