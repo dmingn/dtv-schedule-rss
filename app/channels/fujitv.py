@@ -10,8 +10,8 @@ from app.channel import Channel, Program, Schedule
 
 
 def parse_datetime(datetime_str: str) -> datetime.datetime:
-    date_str, rest = datetime_str.split("T")
-    hours_str, minutes_str, seconds_str = rest.split("W")[0].split(":")
+    date_str = datetime_str[:10]
+    hours_str, minutes_str, seconds_str = datetime_str[11:19].split(":")
 
     return datetime.datetime.fromisoformat(
         date_str + "T00:00:00 +09:00"
