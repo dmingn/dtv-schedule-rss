@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 from xml.etree.ElementTree import Element
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import AwareDatetime, BaseModel, HttpUrl
 
 
 def datetime_to_rfc822(dt: datetime.datetime) -> str:
@@ -13,7 +13,7 @@ class Item(BaseModel):
     title: Optional[str] = None
     link: Optional[HttpUrl] = None
     description: Optional[str] = None
-    pub_date: Optional[datetime.datetime] = None
+    pub_date: Optional[AwareDatetime] = None
 
     def to_xml(self) -> Element:
         item = Element("item")

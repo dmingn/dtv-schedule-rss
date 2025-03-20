@@ -2,7 +2,7 @@ import abc
 import datetime
 from typing import Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import AwareDatetime, BaseModel, HttpUrl
 
 from app import rss
 
@@ -11,7 +11,7 @@ class Program(BaseModel):
     title: str
     url: Optional[HttpUrl]
     description: Optional[str]
-    start: datetime.datetime
+    start: AwareDatetime
 
     def to_rss_item(self) -> rss.Item:
         return rss.Item(
