@@ -15,10 +15,9 @@ class Program(BaseModel):
 
     @property
     def rss_description(self) -> str:
-        return "\n\n".join(
-            [self.start.strftime("%m/%d %H:%M")]
-            + ([self.description] if self.description else [])
-        )
+        return (
+            self.start.strftime("%m/%d %H:%M") + "\n\n" + (self.description or "")
+        ).strip()
 
     @property
     def rss_pub_date(self) -> datetime.datetime:
