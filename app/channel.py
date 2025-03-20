@@ -13,16 +13,24 @@ class Program(BaseModel):
     description: Optional[str]
     start: AwareDatetime
 
+    @property
+    def rss_description(self) -> str:
+        return "\n\n".join(
+            [self.start.strftime("%m/%d %H:%M")]
+            + ([self.description] if self.description else [])
+        )
+
+    @property
+    def rss_pub_date(self) -> datetime.datetime:
+        # to make pubDate in the past, subtract 7 days from start for convenience
+        return self.start - datetime.timedelta(days=7)
+
     def to_rss_item(self) -> rss.Item:
         return rss.Item(
             title=self.title,
             link=self.url,
-            description="\n\n".join(
-                [self.start.strftime("%m/%d %H:%M")]
-                + ([self.description] if self.description else [])
-            ),
-            # to make pubDate in the past, subtract 7 days from start for convenience
-            pub_date=self.start - datetime.timedelta(days=7),
+            description=self.rss_description,
+            pub_date=self.rss_pub_date,
         )
 
 
