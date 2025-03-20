@@ -4,7 +4,7 @@ import re
 from zoneinfo import ZoneInfo
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from cachetools.func import ttl_cache
 from pydantic import HttpUrl
 
@@ -67,6 +67,9 @@ def parse_html(html: str) -> tuple[Program, ...]:
     soup = BeautifulSoup(html, "html.parser")
 
     tt_day_tr = soup.find("tr", id="ttDay")
+    if not isinstance(tt_day_tr, Tag):
+        raise ValueError("ttDay not found")
+
     dates = [
         parse_day_str(td.text.strip())
         for td in tt_day_tr.find_all("td", class_=lambda x: x != "none")

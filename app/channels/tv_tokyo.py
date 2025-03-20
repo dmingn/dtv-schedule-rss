@@ -73,7 +73,7 @@ class TvTokyo(Channel):
             channel_url=HttpUrl(
                 "https://www.tv-tokyo.co.jp/timetable/broad_tvtokyo/thisweek/"
             ),
-            programs=programs,
+            programs=list(programs),
         )
 
 
