@@ -15,4 +15,4 @@ COPY app ./app
 
 USER appuser:appgroup
 
-ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+ENTRYPOINT [".venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
