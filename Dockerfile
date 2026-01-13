@@ -5,11 +5,11 @@ RUN groupadd -g 1000 appgroup && \
 
 WORKDIR /workdir
 
-RUN pip install pipenv==2024.4.1
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-COPY Pipfile Pipfile.lock ./
+COPY pyproject.toml uv.lock ./
 
-RUN pipenv install --deploy --system
+RUN uv sync --frozen --no-dev --no-install-project
 
 COPY app ./app
 
