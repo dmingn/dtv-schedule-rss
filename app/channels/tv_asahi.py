@@ -46,7 +46,7 @@ def parse_new_day_table(new_day_table, date: datetime.datetime) -> Program:
     return Program(
         title=prog_name_span.text.strip(),
         url=HttpUrl("https://www.tv-asahi.co.jp/" + prog_name_span_a["href"]),
-        description=expo_org_span.text.strip(),
+        description=expo_org_span.text.strip() if expo_org_span else "",
         start=calc_start_from_date_hours_and_minutes(
             date=date, hours=int(hours_str), minutes=int(minuts_str)
         ),
