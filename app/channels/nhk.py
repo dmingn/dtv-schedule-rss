@@ -1,6 +1,6 @@
 import datetime
 import itertools
-from typing import Literal, Optional
+from typing import Literal
 
 import requests
 from cachetools.func import ttl_cache
@@ -10,7 +10,7 @@ from app.channel import Channel, Program, Schedule
 
 
 class About(BaseModel):
-    canonical: Optional[HttpUrl] = None
+    canonical: HttpUrl | None = None
 
 
 class BroadcastEvent(BaseModel):
@@ -20,7 +20,7 @@ class BroadcastEvent(BaseModel):
     description: str
     startDate: datetime.datetime
     endDate: datetime.datetime
-    about: Optional[About] = None
+    about: About | None = None
 
     def to_program(self) -> Program:
         return Program(

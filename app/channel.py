@@ -1,6 +1,5 @@
 import abc
 import datetime
-from typing import Optional
 
 from pydantic import AwareDatetime, BaseModel, HttpUrl
 
@@ -9,8 +8,8 @@ from app import rss
 
 class Program(BaseModel):
     title: str
-    url: Optional[HttpUrl]
-    description: Optional[str]
+    url: HttpUrl | None
+    description: str | None
     start: AwareDatetime
 
     @property

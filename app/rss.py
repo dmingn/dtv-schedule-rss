@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional
 from xml.etree.ElementTree import Element
 
 from pydantic import AwareDatetime, BaseModel, HttpUrl
@@ -10,10 +9,10 @@ def datetime_to_rfc822(dt: datetime.datetime) -> str:
 
 
 class Item(BaseModel):
-    title: Optional[str] = None
-    link: Optional[HttpUrl] = None
-    description: Optional[str] = None
-    pub_date: Optional[AwareDatetime] = None
+    title: str | None = None
+    link: HttpUrl | None = None
+    description: str | None = None
+    pub_date: AwareDatetime | None = None
 
     def to_xml(self) -> Element:
         item = Element("item")
@@ -45,7 +44,7 @@ class Channel(BaseModel):
     title: str
     link: HttpUrl
     description: str
-    item: Optional[list[Item]] = None
+    item: list[Item] | None = None
 
     def to_xml(self) -> Element:
         rss = Element("rss")
