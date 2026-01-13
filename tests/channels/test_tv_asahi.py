@@ -2,7 +2,6 @@ import datetime
 from zoneinfo import ZoneInfo
 
 import pytest
-from bs4 import BeautifulSoup
 
 from app.channels.tv_asahi import calc_start_from_date_hours_and_minutes, parse_day_str
 
