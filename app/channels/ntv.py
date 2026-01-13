@@ -1,7 +1,6 @@
 import datetime
 import json
 import time
-from typing import Optional
 
 import requests
 from cachetools.func import ttl_cache
@@ -22,8 +21,8 @@ class NtvProgram(BaseModel):
     end_time: str
     program_title_excluding_hanrei: str
     program_content: str
-    program_detail: Optional[str] = None
-    program_site_url: Optional[HttpUrl] = None
+    program_detail: str | None = None
+    program_site_url: HttpUrl | None = None
 
     def to_program(self) -> Program:
         return Program(
@@ -32,7 +31,10 @@ class NtvProgram(BaseModel):
             description=self.program_content
             + (("\n" + self.program_detail) if self.program_detail else ""),
             start=datetime.datetime.strptime(
-                f"{self.actual_datetime.broadcast_date} {self.actual_datetime.start_time} +09:00",
+                (
+                    f"{self.actual_datetime.broadcast_date} "
+                    f"{self.actual_datetime.start_time} +09:00"
+                ),
                 "%Y%m%d %H%M %z",
             ),
         )
@@ -40,7 +42,9 @@ class NtvProgram(BaseModel):
 
 @ttl_cache(ttl=60 * 5)
 def fetch_ntv_programs() -> tuple[NtvProgram, ...]:
-    url = f"https://www.ntv.co.jp/program/json/program_list.json?_={int(time.time() * 1000)}"
+    base_url = "https://www.ntv.co.jp/program/json/program_list.json"
+    timestamp = int(time.time() * 1000)
+    url = f"{base_url}?_={timestamp}"
     response = requests.get(url)
     response_json = json.loads(response.content.decode(response.apparent_encoding))
 

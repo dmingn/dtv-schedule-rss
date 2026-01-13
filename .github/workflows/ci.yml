@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Run ruff format check
+        run: uv run ruff format --check .
+
+      - name: Run ruff check
+        run: uv run ruff check .
+
       - name: Run mypy
         run: uv run mypy .
 
