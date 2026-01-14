@@ -25,7 +25,7 @@ def test_get_schedule_rss_returns_xml(path: str):
             new=AsyncMock(
                 return_value=Schedule(
                     channel_name="Test Channel",
-                    channel_url=HttpUrl("http://test.com"),
+                    channel_url=HttpUrl("http://example.com"),
                     programs=[],
                 )
             ),
