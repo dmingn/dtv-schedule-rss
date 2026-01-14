@@ -1,5 +1,5 @@
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import httpx
 from fastapi import FastAPI
@@ -8,6 +8,7 @@ from fastapi import FastAPI
 class AppState:
     def __init__(self, http_client: httpx.AsyncClient):
         self.http_client = http_client
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

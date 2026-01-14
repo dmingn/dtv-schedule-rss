@@ -1,5 +1,6 @@
+from collections.abc import Callable, Coroutine
 from functools import wraps
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 from cachetools import TTLCache
 
@@ -8,7 +9,7 @@ def async_ttl_cache(maxsize: int = 128, ttl: int = 300) -> Callable:
     """
     A simple async-aware TTL cache decorator.
     """
-    cache = TTLCache(maxsize=maxsize, ttl=ttl)
+    cache: TTLCache[str, Any] = TTLCache(maxsize=maxsize, ttl=ttl)
 
     def decorator(fn: Callable[..., Coroutine]) -> Callable:
         @wraps(fn)

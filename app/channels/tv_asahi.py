@@ -90,7 +90,7 @@ def parse_html(html: str) -> tuple[Program, ...]:
 
 async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, ...]:
     response = await fetch_with_retry(client, url)
-    html = response.content.decode(response.apparent_encoding)
+    html = response.text
 
     return parse_html(html)
 
