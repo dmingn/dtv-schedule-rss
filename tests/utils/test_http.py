@@ -1,11 +1,10 @@
 from unittest.mock import AsyncMock, MagicMock
 
-from unittest.mock import AsyncMock, MagicMock
-
 import httpx
 import pytest
 import tenacity
-from app.utils.http import fetch_with_retry, Http5xxError
+
+from app.utils.http import Http5xxError, fetch_with_retry
 
 
 @pytest.fixture
@@ -26,7 +25,10 @@ async def test_fetch_with_retry_success(mock_client):
 
 
 async def test_fetch_with_retry_timeout(mock_client):
-    mock_client.get.side_effect = [httpx.TimeoutException("timeout"), MagicMock(status_code=200)]
+    mock_client.get.side_effect = [
+        httpx.TimeoutException("timeout"),
+        MagicMock(status_code=200),
+    ]
 
     await fetch_with_retry(mock_client, "http://test.com")
 
@@ -34,7 +36,10 @@ async def test_fetch_with_retry_timeout(mock_client):
 
 
 async def test_fetch_with_retry_network_error(mock_client):
-    mock_client.get.side_effect = [httpx.NetworkError("network error"), MagicMock(status_code=200)]
+    mock_client.get.side_effect = [
+        httpx.NetworkError("network error"),
+        MagicMock(status_code=200),
+    ]
 
     await fetch_with_retry(mock_client, "http://test.com")
 
@@ -43,11 +48,15 @@ async def test_fetch_with_retry_network_error(mock_client):
 
 async def test_fetch_with_retry_5xx_error(mock_client):
     mock_503_response = MagicMock(spec=httpx.Response, status_code=503)
-    mock_client.get.side_effect = [Http5xxError(mock_503_response), MagicMock(status_code=200)]
+    mock_client.get.side_effect = [
+        Http5xxError(mock_503_response),
+        MagicMock(status_code=200),
+    ]
 
     await fetch_with_retry(mock_client, "http://test.com")
 
     assert mock_client.get.call_count == 2
+
 
 async def test_fetch_with_retry_final_failure(mock_client):
     mock_client.get.side_effect = httpx.TimeoutException("timeout")
