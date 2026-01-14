@@ -6,7 +6,7 @@ from tenacity import (
     wait_exponential,
 )
 
-DEFAULT_TIMEOUT = httpx.Timeout(10.0, connect=5.0)
+DEFAULT_TIMEOUT = httpx.Timeout(10.0, connect=5.0, read=30.0)
 
 
 class Http5xxError(Exception):
