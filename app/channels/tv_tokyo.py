@@ -69,14 +69,14 @@ class TvTokyo(Channel):
 
         tasks = [get_programs(client, date) for date in dates]
         results = await asyncio.gather(*tasks)
-        programs = itertools.chain.from_iterable(results)
+        programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
             channel_name="テレ東",
             channel_url=HttpUrl(
                 "https://www.tv-tokyo.co.jp/timetable/broad_tvtokyo/thisweek/"
             ),
-            programs=list(programs),
+            programs=programs,
         )
 
 
