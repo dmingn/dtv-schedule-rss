@@ -1,12 +1,14 @@
+import asyncio
 import datetime
 import itertools
 from typing import Literal
 
-import requests
-from cachetools.func import ttl_cache
+import httpx
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.utils.cache import async_ttl_cache
+from app.utils.http import fetch_with_retry
 
 
 class About(BaseModel):
@@ -31,14 +33,13 @@ class BroadcastEvent(BaseModel):
         )
 
 
-@ttl_cache(ttl=60 * 5)
-def fetch_broadcast_events(
-    service_id: str, area_id: str, date: datetime.date
+async def fetch_broadcast_events(
+    client: httpx.AsyncClient, service_id: str, area_id: str, date: datetime.date
 ) -> tuple[BroadcastEvent, ...]:
     url = (
         f"https://api.nhk.jp/r7/pg/date/{service_id}/{area_id}/{date.isoformat()}.json"
     )
-    response = requests.get(url)
+    response = await fetch_with_retry(client, url)
     response_json = response.json()
 
     return tuple(
@@ -54,17 +55,17 @@ class Nhk(Channel):
         self.service_id = service_id
         self.area_id = area_id
 
-    def fetch_schedule(self) -> Schedule:
-        broadcast_events = itertools.chain.from_iterable(
-            fetch_broadcast_events(
-                service_id=self.service_id,
-                area_id=self.area_id,
-                date=date,
-            )
-            for date in (
-                datetime.date.today() + datetime.timedelta(days=i) for i in range(7)
-            )
-        )
+    @async_ttl_cache(ttl=60 * 5)
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
+        today = datetime.date.today()
+        dates = [today + datetime.timedelta(days=i) for i in range(7)]
+
+        tasks = [
+            fetch_broadcast_events(client, self.service_id, self.area_id, date)
+            for date in dates
+        ]
+        results = await asyncio.gather(*tasks)
+        broadcast_events = itertools.chain.from_iterable(results)
 
         return Schedule(
             channel_name=self.channel_name,

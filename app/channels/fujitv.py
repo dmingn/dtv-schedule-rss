@@ -1,12 +1,13 @@
+import asyncio
 import datetime
 import itertools
-import json
 
-import requests
-from cachetools.func import ttl_cache
+import httpx
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.utils.cache import async_ttl_cache
+from app.utils.http import fetch_with_retry
 
 
 def parse_datetime(datetime_str: str) -> datetime.datetime:
@@ -35,13 +36,14 @@ class FujitvProgram(BaseModel):
         )
 
 
-@ttl_cache(ttl=60 * 5)
-def fetch_fujitv_programs(date: datetime.date) -> tuple[FujitvProgram, ...]:
+async def fetch_fujitv_programs(
+    client: httpx.AsyncClient, date: datetime.date
+) -> tuple[FujitvProgram, ...]:
     url = (
         f"https://www.fujitv.co.jp/bangumi/json/timetable_{date.strftime('%Y%m%d')}.js"
     )
-    response = requests.get(url)
-    response_json = json.loads(response.content.decode(response.apparent_encoding))
+    response = await fetch_with_retry(client, url)
+    response_json = response.json()
 
     return tuple(
         FujitvProgram.model_validate(item) for item in response_json["contents"]["item"]
@@ -49,13 +51,14 @@ def fetch_fujitv_programs(date: datetime.date) -> tuple[FujitvProgram, ...]:
 
 
 class Fujitv(Channel):
-    def fetch_schedule(self) -> Schedule:
-        fujitv_programs = itertools.chain.from_iterable(
-            fetch_fujitv_programs(date)
-            for date in (
-                datetime.date.today() + datetime.timedelta(days=i) for i in range(7)
-            )
-        )
+    @async_ttl_cache(ttl=60 * 5)
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
+        today = datetime.date.today()
+        dates = [today + datetime.timedelta(days=i) for i in range(7)]
+
+        tasks = [fetch_fujitv_programs(client, date) for date in dates]
+        results = await asyncio.gather(*tasks)
+        fujitv_programs = itertools.chain.from_iterable(results)
 
         return Schedule(
             channel_name="フジテレビ",
