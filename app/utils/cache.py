@@ -14,7 +14,10 @@ def async_ttl_cache(maxsize: int = 128, ttl: int = 300) -> Callable:
     def decorator(fn: Callable[..., Coroutine]) -> Callable:
         @wraps(fn)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
-            key = id(args[0])
+            # Create a cache key from args and kwargs
+            # Convert kwargs dict to sorted tuple (dict is unhashable),
+            # then use hash() to get an integer key for the cache
+            key = hash((args, tuple(sorted(kwargs.items()))))
             try:
                 return cache[key]
             except KeyError:
