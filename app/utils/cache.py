@@ -9,9 +9,10 @@ def async_ttl_cache(maxsize: int = 128, ttl: int = 300) -> Callable:
     """
     A simple async-aware TTL cache decorator.
     """
-    cache: TTLCache[int, Any] = TTLCache(maxsize=maxsize, ttl=ttl)
 
     def decorator(fn: Callable[..., Coroutine]) -> Callable:
+        cache: TTLCache[int, Any] = TTLCache(maxsize=maxsize, ttl=ttl)
+
         @wraps(fn)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Create a cache key from args and kwargs
