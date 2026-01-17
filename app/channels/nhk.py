@@ -51,9 +51,13 @@ async def fetch_broadcast_events(
 class Nhk(Channel):
     def __init__(self, channel_name: str, service_id: str, area_id: str):
         super().__init__()
-        self.channel_name = channel_name
+        self._channel_name = channel_name
         self.service_id = service_id
         self.area_id = area_id
+
+    @property
+    def channel_name(self) -> str:
+        return self._channel_name
 
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:

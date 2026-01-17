@@ -48,6 +48,11 @@ class Schedule(BaseModel):
 
 
 class Channel(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def channel_name(self) -> str:
+        pass
+
     @abc.abstractmethod
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         pass
