@@ -61,7 +61,7 @@ class MxTv(Channel):
 
     @property
     def channel_name(self) -> str:
-        return f"TOKYO MX{self.channel}"
+        return f"TOKYO MX {self.channel}"
 
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
