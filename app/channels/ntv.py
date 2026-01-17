@@ -1,12 +1,12 @@
 import datetime
-import json
 import time
 
-import requests
-from cachetools.func import ttl_cache
+import httpx
+from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.utils.http import fetch_with_retry
 
 
 class ActualDatetime(BaseModel):
@@ -40,20 +40,20 @@ class NtvProgram(BaseModel):
         )
 
 
-@ttl_cache(ttl=60 * 5)
-def fetch_ntv_programs() -> tuple[NtvProgram, ...]:
+async def fetch_ntv_programs(client: httpx.AsyncClient) -> tuple[NtvProgram, ...]:
     base_url = "https://www.ntv.co.jp/program/json/program_list.json"
     timestamp = int(time.time() * 1000)
     url = f"{base_url}?_={timestamp}"
-    response = requests.get(url)
-    response_json = json.loads(response.content.decode(response.apparent_encoding))
+    response = await fetch_with_retry(client, url)
+    response_json = response.json()
 
     return tuple(NtvProgram.model_validate(d) for d in response_json)
 
 
 class Ntv(Channel):
-    def fetch_schedule(self) -> Schedule:
-        ntv_programs = fetch_ntv_programs()
+    @alru_cache(ttl=60 * 5)
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
+        ntv_programs = await fetch_ntv_programs(client)
 
         return Schedule(
             channel_name="日本テレビ",

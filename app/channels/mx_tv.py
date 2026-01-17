@@ -1,14 +1,15 @@
+import asyncio
 import datetime
 import itertools
-import json
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-import requests
-from cachetools.func import ttl_cache
+import httpx
+from async_lru import alru_cache
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.utils.http import fetch_with_retry
 
 MxTvChannel = Literal[1, 2]
 
@@ -34,21 +35,22 @@ class TokyoMxProgram(BaseModel):
         )
 
 
-@ttl_cache(ttl=60 * 5)
-def fetch_mxtv_programs(
-    mxtv_channel: MxTvChannel, date: datetime.datetime
+async def fetch_mxtv_programs(
+    client: httpx.AsyncClient, mxtv_channel: MxTvChannel, date: datetime.datetime
 ) -> tuple[TokyoMxProgram, ...]:
     url = f"https://s.mxtv.jp/bangumi_file/json01/SV{mxtv_channel}EPG{date.strftime('%Y%m%d')}.json"
-    response = requests.get(url)
-    response_json = json.loads(response.content.decode(response.apparent_encoding))
+    response = await fetch_with_retry(client, url)
+    response_json = response.json()
 
     return tuple(TokyoMxProgram.model_validate(item) for item in response_json)
 
 
-def get_programs(
-    mxtv_channel: MxTvChannel, date: datetime.datetime
+async def get_programs(
+    client: httpx.AsyncClient, mxtv_channel: MxTvChannel, date: datetime.datetime
 ) -> tuple[Program, ...]:
-    mxtv_programs = fetch_mxtv_programs(mxtv_channel=mxtv_channel, date=date)
+    mxtv_programs = await fetch_mxtv_programs(
+        client=client, mxtv_channel=mxtv_channel, date=date
+    )
     return tuple(p.to_program(mxtv_channel) for p in mxtv_programs)
 
 
@@ -57,19 +59,16 @@ class MxTv(Channel):
         super().__init__()
         self.channel = channel
 
-    def fetch_schedule(self) -> Schedule:
-        programs = list(
-            itertools.chain.from_iterable(
-                get_programs(mxtv_channel=self.channel, date=date)
-                for date in (
-                    datetime.datetime.now(tz=ZoneInfo("Asia/Tokyo")).replace(
-                        hour=0, minute=0, second=0, microsecond=0
-                    )
-                    + datetime.timedelta(days=i)
-                    for i in range(7)
-                )
-            )
+    @alru_cache(ttl=60 * 5)
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
+        today = datetime.datetime.now(tz=ZoneInfo("Asia/Tokyo")).replace(
+            hour=0, minute=0, second=0, microsecond=0
         )
+        dates = [today + datetime.timedelta(days=i) for i in range(7)]
+
+        tasks = [get_programs(client, self.channel, date) for date in dates]
+        results = await asyncio.gather(*tasks)
+        programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
             channel_name="TOKYO MX",

@@ -1,6 +1,7 @@
 import abc
 import datetime
 
+import httpx
 from pydantic import AwareDatetime, BaseModel, HttpUrl
 
 from app import rss
@@ -48,5 +49,5 @@ class Schedule(BaseModel):
 
 class Channel(abc.ABC):
     @abc.abstractmethod
-    def fetch_schedule(self) -> Schedule:
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         pass

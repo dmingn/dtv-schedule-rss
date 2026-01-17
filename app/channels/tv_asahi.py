@@ -1,14 +1,16 @@
+import asyncio
 import datetime
 import itertools
 import re
 from zoneinfo import ZoneInfo
 
-import requests
+import httpx
+from async_lru import alru_cache
 from bs4 import BeautifulSoup, Tag
-from cachetools.func import ttl_cache
 from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.utils.http import fetch_with_retry
 
 
 def parse_day_str(day_str: str) -> datetime.datetime:
@@ -86,25 +88,23 @@ def parse_html(html: str) -> tuple[Program, ...]:
     )
 
 
-@ttl_cache(ttl=60 * 5)
-def fetch_programs(url: str) -> tuple[Program, ...]:
-    response = requests.get(url)
-    html = response.content.decode(response.apparent_encoding)
+async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, ...]:
+    response = await fetch_with_retry(client, url)
+    html = response.text
 
     return parse_html(html)
 
 
 class TvAsahi(Channel):
-    def fetch_schedule(self) -> Schedule:
-        programs = list(
-            itertools.chain.from_iterable(
-                fetch_programs(url)
-                for url in [
-                    "https://www.tv-asahi.co.jp/bangumi/index.html",
-                    "https://www.tv-asahi.co.jp/bangumi/next.html",
-                ]
-            )
-        )
+    @alru_cache(ttl=60 * 5)
+    async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
+        urls = [
+            "https://www.tv-asahi.co.jp/bangumi/index.html",
+            "https://www.tv-asahi.co.jp/bangumi/next.html",
+        ]
+        tasks = [fetch_programs(client, url) for url in urls]
+        results = await asyncio.gather(*tasks)
+        programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
             channel_name="テレビ朝日",

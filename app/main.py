@@ -14,6 +14,7 @@ from app.channels import (
     tv_asahi,
     tv_tokyo,
 )
+from app.lifespan import lifespan
 
 path_to_channel: dict[str, Channel] = {
     "joak-dtv": nhk_g1_130,
@@ -28,7 +29,7 @@ path_to_channel: dict[str, Channel] = {
 }
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/{path}")
@@ -36,9 +37,10 @@ async def get_schedule_rss(path: str) -> Response:
     if path not in path_to_channel:
         return Response(status_code=404)
 
+    client = app.state.http_client
+    schedule = await path_to_channel[path].fetch_schedule(client)
+
     return Response(
-        content=tostring(
-            path_to_channel[path].fetch_schedule().to_rss_channel().to_xml()
-        ),
+        content=tostring(schedule.to_rss_channel().to_xml()),
         media_type="application/xml",
     )
