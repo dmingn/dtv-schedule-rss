@@ -6,8 +6,6 @@ from tenacity import (
     wait_exponential,
 )
 
-DEFAULT_TIMEOUT = httpx.Timeout(10.0, connect=5.0, read=30.0)
-
 
 class Http5xxError(Exception):
     """Custom exception for HTTP 5xx errors."""
@@ -28,7 +26,7 @@ async def fetch_with_retry(client: httpx.AsyncClient, url: str) -> httpx.Respons
     """
     Fetches a URL with retries on transient errors.
     """
-    response = await client.get(url, timeout=DEFAULT_TIMEOUT)
+    response = await client.get(url)
     if 500 <= response.status_code < 600:
         raise Http5xxError(response)
     response.raise_for_status()
