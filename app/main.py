@@ -1,7 +1,8 @@
 from xml.etree.ElementTree import tostring
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from app.channel import Channel
 from app.channels import (
@@ -31,45 +32,14 @@ path_to_channel: dict[str, Channel] = {
 
 
 app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/", response_class=HTMLResponse)
-async def get_top_page() -> str:
-    html_links = "".join(
-        [
-            f'<li><a href="/{path}">{channel.channel_name}</a></li>'
-            for path, channel in path_to_channel.items()
-        ]
+async def get_top_page(request: Request) -> Response:
+    return templates.TemplateResponse(
+        request, "index.html", {"channels": path_to_channel}
     )
-
-    return f"""
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="utf-8">
-    <title>テレビ番組表 RSS フィード</title>
-    <style>
-        body {{
-            font-family: sans-serif;
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-        }}
-        h1 {{ color: #333; }}
-        ul {{ list-style: none; padding: 0; }}
-        li {{ margin: 10px 0; }}
-        a {{ color: #0066cc; text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
-    </style>
-</head>
-<body>
-    <h1>テレビ番組表 RSS フィード</h1>
-    <ul>
-        {html_links}
-    </ul>
-</body>
-</html>
-"""
 
 
 @app.get("/{path}")
