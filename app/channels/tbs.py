@@ -3,11 +3,11 @@ import datetime
 import itertools
 
 import httpx
+from async_lru import alru_cache
 from bs4 import BeautifulSoup
 from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.cache import async_ttl_cache
 from app.utils.http import fetch_with_retry
 
 
@@ -41,7 +41,7 @@ async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, 
 
 
 class Tbs(Channel):
-    @async_ttl_cache(ttl=60 * 5)
+    @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         urls = [
             "https://www.tbs.co.jp/tv/index.html",

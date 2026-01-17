@@ -5,10 +5,10 @@ from typing import Literal
 from zoneinfo import ZoneInfo
 
 import httpx
+from async_lru import alru_cache
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.cache import async_ttl_cache
 from app.utils.http import fetch_with_retry
 
 MxTvChannel = Literal[1, 2]
@@ -59,7 +59,7 @@ class MxTv(Channel):
         super().__init__()
         self.channel = channel
 
-    @async_ttl_cache(ttl=60 * 5)
+    @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.datetime.now(tz=ZoneInfo("Asia/Tokyo")).replace(
             hour=0, minute=0, second=0, microsecond=0

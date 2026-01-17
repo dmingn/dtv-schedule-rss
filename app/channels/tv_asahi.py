@@ -5,11 +5,11 @@ import re
 from zoneinfo import ZoneInfo
 
 import httpx
+from async_lru import alru_cache
 from bs4 import BeautifulSoup, Tag
 from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.cache import async_ttl_cache
 from app.utils.http import fetch_with_retry
 
 
@@ -96,7 +96,7 @@ async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, 
 
 
 class TvAsahi(Channel):
-    @async_ttl_cache(ttl=60 * 5)
+    @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         urls = [
             "https://www.tv-asahi.co.jp/bangumi/index.html",

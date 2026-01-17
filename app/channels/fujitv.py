@@ -3,10 +3,10 @@ import datetime
 import itertools
 
 import httpx
+from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.cache import async_ttl_cache
 from app.utils.http import fetch_with_retry
 
 
@@ -51,7 +51,7 @@ async def fetch_fujitv_programs(
 
 
 class Fujitv(Channel):
-    @async_ttl_cache(ttl=60 * 5)
+    @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.date.today()
         dates = [today + datetime.timedelta(days=i) for i in range(7)]
