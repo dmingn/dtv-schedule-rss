@@ -14,7 +14,7 @@ from app.channels import (
     tv_asahi,
     tv_tokyo,
 )
-from app.http_client import lifespan
+from app.lifespan import lifespan
 
 path_to_channel: dict[str, Channel] = {
     "joak-dtv": nhk_g1_130,
