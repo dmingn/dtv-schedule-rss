@@ -71,7 +71,7 @@ class MxTv(Channel):
         programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
-            channel_name=f"TOKYO MX {self.channel}",
+            channel_name="TOKYO MX",
             channel_url=HttpUrl("https://s.mxtv.jp/bangumi/"),
             programs=programs,
         )
