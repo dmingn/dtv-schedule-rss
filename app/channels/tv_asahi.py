@@ -96,6 +96,10 @@ async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, 
 
 
 class TvAsahi(Channel):
+    @property
+    def channel_name(self) -> str:
+        return "テレビ朝日"
+
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         urls = [
@@ -107,7 +111,7 @@ class TvAsahi(Channel):
         programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
-            channel_name="テレビ朝日",
+            channel_name=self.channel_name,
             channel_url=HttpUrl("https://www.tv-asahi.co.jp/bangumi/"),
             programs=programs,
         )

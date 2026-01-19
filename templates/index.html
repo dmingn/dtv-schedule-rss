@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>テレビ番組表 RSS フィード</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        h1 { color: #333; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 10px 0; }
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>テレビ番組表 RSS フィード</h1>
+    <ul>
+        {% for path, channel in channels.items() %}
+        <li><a href="/{{ path }}">{{ channel.channel_name }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

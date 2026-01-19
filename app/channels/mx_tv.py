@@ -59,6 +59,10 @@ class MxTv(Channel):
         super().__init__()
         self.channel = channel
 
+    @property
+    def channel_name(self) -> str:
+        return f"TOKYO MX {self.channel}"
+
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.datetime.now(tz=ZoneInfo("Asia/Tokyo")).replace(
@@ -71,7 +75,7 @@ class MxTv(Channel):
         programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
-            channel_name="TOKYO MX",
+            channel_name=self.channel_name,
             channel_url=HttpUrl("https://s.mxtv.jp/bangumi/"),
             programs=programs,
         )

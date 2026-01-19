@@ -51,12 +51,16 @@ async def fetch_ntv_programs(client: httpx.AsyncClient) -> tuple[NtvProgram, ...
 
 
 class Ntv(Channel):
+    @property
+    def channel_name(self) -> str:
+        return "日本テレビ"
+
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         ntv_programs = await fetch_ntv_programs(client)
 
         return Schedule(
-            channel_name="日本テレビ",
+            channel_name=self.channel_name,
             channel_url=HttpUrl("https://www.ntv.co.jp/program/"),
             programs=[broadcast_event.to_program() for broadcast_event in ntv_programs],
         )

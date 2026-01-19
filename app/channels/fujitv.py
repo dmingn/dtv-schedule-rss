@@ -51,6 +51,10 @@ async def fetch_fujitv_programs(
 
 
 class Fujitv(Channel):
+    @property
+    def channel_name(self) -> str:
+        return "フジテレビ"
+
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.date.today()
@@ -61,7 +65,7 @@ class Fujitv(Channel):
         fujitv_programs = itertools.chain.from_iterable(results)
 
         return Schedule(
-            channel_name="フジテレビ",
+            channel_name=self.channel_name,
             channel_url=HttpUrl("https://www.fujitv.co.jp/timetable/weekly/"),
             programs=[p.to_program() for p in fujitv_programs],
         )

@@ -1,6 +1,9 @@
+from pathlib import Path
 from xml.etree.ElementTree import tostring
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from app.channel import Channel
 from app.channels import (
@@ -30,6 +33,18 @@ path_to_channel: dict[str, Channel] = {
 
 
 app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(
+    directory=Path(__file__).resolve().parent.parent / "templates"
+)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def get_top_page(request: Request) -> Response:
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"channels": path_to_channel},
+    )
 
 
 @app.get("/{path}")

@@ -11,6 +11,7 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv sync --frozen --no-dev --no-install-project
 
+COPY templates ./templates
 COPY app ./app
 
 USER appuser:appgroup

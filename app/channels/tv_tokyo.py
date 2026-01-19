@@ -60,6 +60,10 @@ async def get_programs(
 
 
 class TvTokyo(Channel):
+    @property
+    def channel_name(self) -> str:
+        return "テレ東"
+
     @alru_cache(ttl=60 * 5)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.datetime.now(tz=ZoneInfo("Asia/Tokyo")).replace(
@@ -72,7 +76,7 @@ class TvTokyo(Channel):
         programs = list(itertools.chain.from_iterable(results))
 
         return Schedule(
-            channel_name="テレ東",
+            channel_name=self.channel_name,
             channel_url=HttpUrl(
                 "https://www.tv-tokyo.co.jp/timetable/broad_tvtokyo/thisweek/"
             ),

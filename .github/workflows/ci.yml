@@ -75,13 +75,23 @@ jobs:
 
       - name: Test API endpoint
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/joak-dtv)
-          if [ "$response" != "200" ]; then
-            echo "API test failed with status code: $response"
+          # Test root path
+          root_response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/)
+          if [ "$root_response" != "200" ]; then
+            echo "Root path test failed with status code: $root_response"
             docker logs test-container
             exit 1
           fi
-          echo "API test passed"
+          echo "Root path test passed"
+          
+          # Test RSS feed endpoint
+          rss_response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/joak-dtv)
+          if [ "$rss_response" != "200" ]; then
+            echo "RSS feed test failed with status code: $rss_response"
+            docker logs test-container
+            exit 1
+          fi
+          echo "RSS feed test passed"
 
       - name: Show container logs on failure
         if: failure()
