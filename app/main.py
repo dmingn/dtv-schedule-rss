@@ -33,7 +33,9 @@ path_to_channel: dict[str, Channel] = {
 
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
+templates = Jinja2Templates(
+    directory=Path(__file__).resolve().parent.parent / "templates"
+)
 
 
 @app.get("/", response_class=HTMLResponse)
