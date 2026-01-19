@@ -38,7 +38,9 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def get_top_page(request: Request) -> Response:
     return templates.TemplateResponse(
-        request, "index.html", {"channels": path_to_channel}
+        request=request,
+        name="index.html",
+        context={"channels": path_to_channel},
     )
 
 
