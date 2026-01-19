@@ -1,3 +1,4 @@
+from pathlib import Path
 from xml.etree.ElementTree import tostring
 
 from fastapi import FastAPI, Request, Response
@@ -32,7 +33,7 @@ path_to_channel: dict[str, Channel] = {
 
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=Path(__file__).resolve().parent.parent / "templates")
 
 
 @app.get("/", response_class=HTMLResponse)
