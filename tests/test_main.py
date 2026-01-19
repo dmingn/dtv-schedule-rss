@@ -21,6 +21,9 @@ def test_get_top_page_returns_html():
         assert response.status_code == 200
         assert response.headers["content-type"] == "text/html; charset=utf-8"
         assert "<title>テレビ番組表 RSS フィード</title>" in response.text
+        for path, channel in path_to_channel.items():
+            assert f'href="/{path}"' in response.text
+            assert f">{channel.channel_name}</a>" in response.text
 
 
 @pytest.mark.parametrize("path", path_to_channel.keys())
