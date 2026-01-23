@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import itertools
+import logging
 
 import httpx
 from async_lru import alru_cache
@@ -9,6 +10,8 @@ from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
 from app.utils.http import fetch_text_with_retry
+
+logger = logging.getLogger(__name__)
 
 
 def parse_td_item(td) -> Program:
@@ -36,7 +39,12 @@ def parse_html(html: str) -> tuple[Program, ...]:
 async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, ...]:
     html = await fetch_text_with_retry(client, url)
 
-    return parse_html(html)
+    try:
+        return parse_html(html)
+    except (ValueError, AttributeError):
+        html_preview = html[:500] if html else "(empty)"
+        logger.exception(f"HTML parse error for {url}, html_preview={html_preview!r}")
+        raise
 
 
 class Tbs(Channel):
