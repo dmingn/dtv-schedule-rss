@@ -6,7 +6,11 @@ import pytest
 import tenacity
 from tenacity import wait_fixed
 
-from app.utils.http import fetch_json_with_retry, fetch_with_retry
+from app.utils.http import (
+    fetch_json_with_retry,
+    fetch_text_with_retry,
+    fetch_with_retry,
+)
 
 
 @pytest.fixture
@@ -196,3 +200,27 @@ async def test_fetch_json_with_retry_logs_all_retry_attempts(mock_client, caplog
     assert len(caplog.records) == 5
     assert caplog.text.count("JSON decode error") == 3
     assert caplog.text.count("JSON fetch/parse attempt") == 2
+
+
+async def test_fetch_text_with_retry_success(mock_client):
+    mock_response = MagicMock(spec=httpx.Response)
+    mock_response.status_code = 200
+    mock_response.text = "<html>test</html>"
+    mock_client.get.return_value = mock_response
+
+    result = await fetch_text_with_retry(mock_client, "http://example.com")
+
+    assert result == "<html>test</html>"
+    mock_client.get.assert_called_once()
+
+
+async def test_fetch_text_with_retry_retries_on_exception(mock_client):
+    mock_client.get.side_effect = [
+        httpx.TimeoutException("timeout"),
+        MagicMock(spec=httpx.Response, status_code=200, text="<html>test</html>"),
+    ]
+
+    result = await fetch_text_with_retry(mock_client, "http://example.com")
+
+    assert result == "<html>test</html>"
+    assert mock_client.get.call_count == 2
