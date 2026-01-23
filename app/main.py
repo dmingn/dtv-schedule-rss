@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from xml.etree.ElementTree import tostring
 
@@ -18,6 +19,8 @@ from app.channels import (
     tv_tokyo,
 )
 from app.lifespan import lifespan
+
+logger = logging.getLogger(__name__)
 
 path_to_channel: dict[str, Channel] = {
     "joak-dtv": nhk_g1_130,
@@ -52,10 +55,14 @@ async def get_schedule_rss(path: str) -> Response:
     if path not in path_to_channel:
         return Response(status_code=404)
 
-    client = app.state.http_client
-    schedule = await path_to_channel[path].fetch_schedule(client)
+    try:
+        client = app.state.http_client
+        schedule = await path_to_channel[path].fetch_schedule(client)
 
-    return Response(
-        content=tostring(schedule.to_rss_channel().to_xml()),
-        media_type="application/xml",
-    )
+        return Response(
+            content=tostring(schedule.to_rss_channel().to_xml()),
+            media_type="application/xml",
+        )
+    except Exception:
+        logger.exception(f"Error fetching schedule for path: {path}")
+        return Response(status_code=500)
