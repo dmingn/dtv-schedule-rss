@@ -194,7 +194,5 @@ async def test_fetch_json_with_retry_logs_all_retry_attempts(mock_client, caplog
 
     # We expect 3 JSON decode error logs and 2 retry logs.
     assert len(caplog.records) == 5
-    assert any("JSON decode error" in record.message for record in caplog.records)
-    assert any(
-        "JSON fetch/parse attempt" in record.message for record in caplog.records
-    )
+    assert caplog.text.count("JSON decode error") == 3
+    assert caplog.text.count("JSON fetch/parse attempt") == 2
