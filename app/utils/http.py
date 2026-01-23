@@ -28,11 +28,7 @@ def _make_retry_attempt_logger(operation: str):
     def _log_retry_attempt(retry_state: RetryCallState) -> None:
         attempt = retry_state.attempt_number
         exception = retry_state.outcome.exception() if retry_state.outcome else None
-        url = (
-            retry_state.kwargs.get("url", "unknown")
-            if retry_state.kwargs
-            else "unknown"
-        )
+        url = retry_state.kwargs.get("url", "unknown")
         if exception:
             logger.warning(
                 f"{operation} attempt {attempt} failed for {url}: {exception}, "
