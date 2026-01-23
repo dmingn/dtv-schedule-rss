@@ -9,7 +9,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_json_with_retry
 
 MxTvChannel = Literal[1, 2]
 
@@ -39,8 +39,7 @@ async def fetch_mxtv_programs(
     client: httpx.AsyncClient, mxtv_channel: MxTvChannel, date: datetime.datetime
 ) -> tuple[TokyoMxProgram, ...]:
     url = f"https://s.mxtv.jp/bangumi_file/json01/SV{mxtv_channel}EPG{date.strftime('%Y%m%d')}.json"
-    response = await fetch_with_retry(client, url)
-    response_json = response.json()
+    response_json = await fetch_json_with_retry(client, url)
 
     return tuple(TokyoMxProgram.model_validate(item) for item in response_json)
 

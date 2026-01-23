@@ -7,7 +7,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_json_with_retry
 
 
 def parse_datetime(datetime_str: str) -> datetime.datetime:
@@ -42,8 +42,7 @@ async def fetch_fujitv_programs(
     url = (
         f"https://www.fujitv.co.jp/bangumi/json/timetable_{date.strftime('%Y%m%d')}.js"
     )
-    response = await fetch_with_retry(client, url)
-    response_json = response.json()
+    response_json = await fetch_json_with_retry(client, url)
 
     return tuple(
         FujitvProgram.model_validate(item) for item in response_json["contents"]["item"]

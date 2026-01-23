@@ -6,7 +6,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_json_with_retry
 
 
 class ActualDatetime(BaseModel):
@@ -44,8 +44,7 @@ async def fetch_ntv_programs(client: httpx.AsyncClient) -> tuple[NtvProgram, ...
     base_url = "https://www.ntv.co.jp/program/json/program_list.json"
     timestamp = int(time.time() * 1000)
     url = f"{base_url}?_={timestamp}"
-    response = await fetch_with_retry(client, url)
-    response_json = response.json()
+    response_json = await fetch_json_with_retry(client, url)
 
     return tuple(NtvProgram.model_validate(d) for d in response_json)
 

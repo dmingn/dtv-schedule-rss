@@ -8,7 +8,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_json_with_retry
 
 
 def calc_start_from_date_hours_and_minutes(
@@ -42,8 +42,7 @@ async def fetch_tv_tokyo_programs(
     client: httpx.AsyncClient, date: datetime.datetime
 ) -> tuple[TvTokyoProgram, ...]:
     url = f"https://www.tv-tokyo.co.jp/tbcms/assets/data/{date.strftime('%Y%m%d')}.json"
-    response = await fetch_with_retry(client, url)
-    response_json = response.json()
+    response_json = await fetch_json_with_retry(client, url)
 
     items = [
         v["1"] for v in response_json.values() if "1" in v and v["1"]["start_time"]
