@@ -145,7 +145,7 @@ async def test_fetch_json_with_retry_logs_json_decode_error(mock_client, caplog)
     mock_response.text = "invalid json"
     mock_client.get.return_value = mock_response
 
-    with caplog.at_level("ERROR"):
+    with caplog.at_level("WARNING"):
         try:
             await fetch_json_with_retry.retry_with(wait=wait_fixed(0))(
                 mock_client, "http://example.com"
@@ -155,7 +155,7 @@ async def test_fetch_json_with_retry_logs_json_decode_error(mock_client, caplog)
 
     assert len(caplog.records) >= 1
     assert any("JSON decode error" in record.message for record in caplog.records)
-    assert any(record.levelname == "ERROR" for record in caplog.records)
+    assert any(record.levelname == "WARNING" for record in caplog.records)
 
 
 async def test_fetch_json_with_retry_json_decode_error_final_failure(mock_client):

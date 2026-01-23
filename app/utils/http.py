@@ -82,9 +82,10 @@ async def fetch_json_with_retry(client: httpx.AsyncClient, url: str) -> Any:
     except json.JSONDecodeError:
         content_type = response.headers.get("Content-Type", "unknown")
         body_preview = response.text[:200] if response.text else "(empty)"
-        logger.exception(
+        logger.warning(
             f"JSON decode error for {url}: status={response.status_code}, "
-            f"content_type={content_type}, body_preview={body_preview!r}"
+            f"content_type={content_type}, body_preview={body_preview!r}",
+            exc_info=True,
         )
         raise
 
