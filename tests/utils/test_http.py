@@ -154,8 +154,10 @@ async def test_fetch_json_with_retry_logs_json_decode_error(mock_client, caplog)
             pass
 
     assert len(caplog.records) >= 1
-    assert any("JSON decode error" in record.message for record in caplog.records)
-    assert any(record.levelname == "WARNING" for record in caplog.records)
+    assert any(
+        "JSON decode error" in r.message and r.levelname == "WARNING"
+        for r in caplog.records
+    )
 
 
 async def test_fetch_json_with_retry_json_decode_error_final_failure(mock_client):
