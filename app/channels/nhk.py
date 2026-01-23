@@ -8,7 +8,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_json_with_retry
 
 
 class About(BaseModel):
@@ -39,8 +39,7 @@ async def fetch_broadcast_events(
     url = (
         f"https://api.nhk.jp/r7/pg/date/{service_id}/{area_id}/{date.isoformat()}.json"
     )
-    response = await fetch_with_retry(client, url)
-    response_json = response.json()
+    response_json = await fetch_json_with_retry(client, url)
 
     return tuple(
         BroadcastEvent.model_validate(d)
