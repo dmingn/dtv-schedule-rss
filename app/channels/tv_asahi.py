@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup, Tag
 from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
-from app.utils.http import fetch_with_retry
+from app.utils.http import fetch_text_with_retry
 
 
 def parse_day_str(day_str: str) -> datetime.datetime:
@@ -89,8 +89,7 @@ def parse_html(html: str) -> tuple[Program, ...]:
 
 
 async def fetch_programs(client: httpx.AsyncClient, url: str) -> tuple[Program, ...]:
-    response = await fetch_with_retry(client, url)
-    html = response.text
+    html = await fetch_text_with_retry(client, url)
 
     return parse_html(html)
 

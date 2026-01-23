@@ -6,7 +6,10 @@ import pytest
 import tenacity
 from tenacity import wait_fixed
 
-from app.utils.http import fetch_json_with_retry, fetch_with_retry
+from app.utils.http import (
+    fetch_json_with_retry,
+    fetch_with_retry,
+)
 
 
 @pytest.fixture

@@ -91,3 +91,12 @@ async def fetch_json_with_retry(client: httpx.AsyncClient, url: str) -> Any:
 
     logger.debug(f"Successfully parsed JSON from {url}")
     return response_json
+
+
+async def fetch_text_with_retry(client: httpx.AsyncClient, url: str) -> str:
+    """
+    Fetches a URL and returns text content with retries on transient errors.
+    """
+    response = await fetch_with_retry(client, url)
+    logger.debug(f"Successfully fetched text from {url}")
+    return response.text
