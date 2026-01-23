@@ -184,7 +184,7 @@ async def test_fetch_json_with_retry_logs_all_retry_attempts(mock_client, caplog
     mock_response.text = "invalid json"
     mock_client.get.return_value = mock_response
 
-    with caplog.at_level("WARNING", "ERROR"):
+    with caplog.at_level("WARNING"):
         with pytest.raises(tenacity.RetryError):
             await fetch_json_with_retry.retry_with(wait=wait_fixed(0))(
                 mock_client, "http://example.com"
