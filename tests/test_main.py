@@ -22,8 +22,16 @@ def test_get_top_page_returns_html():
         assert response.headers["content-type"] == "text/html; charset=utf-8"
         assert "<title>テレビ番組表 RSS フィード</title>" in response.text
         for path, channel in path_to_channel.items():
-            assert f'href="/{path}"' in response.text
+            assert f'href="http://testserver/{path}"' in response.text
             assert f">{channel.channel_name}</a>" in response.text
+
+
+def test_get_top_page_with_root_path_returns_html():
+    with TestClient(app, root_path="/dtv-rss") as client:
+        response = client.get("/")
+        assert response.status_code == 200
+        for path, channel in path_to_channel.items():
+            assert f'href="http://testserver/dtv-rss/{path}"' in response.text
 
 
 @pytest.mark.parametrize("path", path_to_channel.keys())
