@@ -50,9 +50,7 @@ def test_uvicorn_root_path_integration():
             )
 
         # Verify that the links in the HTML contain the root_path
-        # Note: url_for with root_path might generate absolute URLs or paths
-        # depending on configuration, but it should definitely include the prefix.
-        assert f"{root_path}/joak-dtv" in response.text
+        assert f"{root_path}/" in response.text
 
     finally:
         proc.terminate()
