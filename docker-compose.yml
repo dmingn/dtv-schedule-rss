@@ -7,4 +7,4 @@ services:
     environment:
       - UVICORN_ROOT_PATH=/
       - UVICORN_PROXY_HEADERS=true
-      - UVICORN_FORWARDED_ALLOW_IPS=*
+      - UVICORN_FORWARDED_ALLOW_IPS=127.0.0.1
