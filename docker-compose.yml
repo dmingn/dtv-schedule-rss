@@ -5,4 +5,7 @@ services:
     ports:
       - "8000:80"
     environment:
+      UVICORN_ROOT_PATH: /
+      UVICORN_PROXY_HEADERS: "true"
+      UVICORN_FORWARDED_ALLOW_IPS: 127.0.0.1
       SCHEDULE_CACHE_TTL_SECONDS: 3600
