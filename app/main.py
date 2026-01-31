@@ -41,7 +41,7 @@ templates = Jinja2Templates(
 )
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, name="index")
 async def get_top_page(request: Request) -> Response:
     return templates.TemplateResponse(
         request=request,
@@ -50,7 +50,7 @@ async def get_top_page(request: Request) -> Response:
     )
 
 
-@app.get("/{path}")
+@app.get("/{path}", name="rss_feed")
 async def get_schedule_rss(path: str) -> Response:
     if path not in path_to_channel:
         return Response(status_code=404)

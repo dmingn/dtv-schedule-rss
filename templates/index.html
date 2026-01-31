@@ -21,7 +21,7 @@
     <h1>テレビ番組表 RSS フィード</h1>
     <ul>
         {% for path, channel in channels.items() %}
-        <li><a href="/{{ path }}">{{ channel.channel_name }}</a></li>
+        <li><a href="{{ url_for('rss_feed', path=path) }}">{{ channel.channel_name }}</a></li>
         {% endfor %}
     </ul>
 </body>
