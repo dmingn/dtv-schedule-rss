@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup, Tag
 from pydantic import HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.config import settings
 from app.utils.http import fetch_text_with_retry
 
 logger = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class TvAsahi(Channel):
     def channel_name(self) -> str:
         return "テレビ朝日"
 
-    @alru_cache(ttl=60 * 5)
+    @alru_cache(ttl=settings.schedule_cache_ttl_seconds)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         urls = [
             "https://www.tv-asahi.co.jp/bangumi/index.html",

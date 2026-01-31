@@ -8,6 +8,7 @@ from async_lru import alru_cache
 from pydantic import BaseModel, HttpUrl
 
 from app.channel import Channel, Program, Schedule
+from app.config import settings
 from app.utils.http import fetch_json_with_retry
 
 
@@ -58,7 +59,7 @@ class Nhk(Channel):
     def channel_name(self) -> str:
         return self._channel_name
 
-    @alru_cache(ttl=60 * 5)
+    @alru_cache(ttl=settings.schedule_cache_ttl_seconds)
     async def fetch_schedule(self, client: httpx.AsyncClient) -> Schedule:
         today = datetime.date.today()
         dates = [today + datetime.timedelta(days=i) for i in range(7)]
