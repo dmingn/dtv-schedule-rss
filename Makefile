@@ -6,7 +6,8 @@ test:
 	uv run ruff format --check .
 	uv run ruff check .
 	uv run mypy .
-	uv run python -m pytest -svx
+	uv run python -m pytest -sv tests/unit
+	uv run python -m pytest -sv tests --ignore=tests/unit
 
 .PHONY: format
 format:
