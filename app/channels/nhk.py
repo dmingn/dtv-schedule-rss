@@ -38,7 +38,7 @@ async def fetch_broadcast_events(
     client: httpx.AsyncClient, service_id: str, area_id: str, date: datetime.date
 ) -> tuple[BroadcastEvent, ...]:
     url = (
-        f"https://api.nhk.jp/r7/pg/date/{service_id}/{area_id}/{date.isoformat()}.json"
+        f"https://api.nhk.jp/r8/pg/date/{service_id}/{area_id}/{date.isoformat()}.json"
     )
     response_json = await fetch_json_with_retry(client, url)
 
