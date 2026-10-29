@@ -7,6 +7,8 @@ import tenacity
 from tenacity import wait_fixed
 
 from app.utils.http import (
+    DEFAULT_USER_AGENT,
+    create_http_client,
     fetch_json_with_retry,
     fetch_with_retry,
 )
@@ -15,6 +17,13 @@ from app.utils.http import (
 @pytest.fixture
 def mock_client():
     return AsyncMock(spec=httpx.AsyncClient)
+
+
+async def test_create_http_client_sets_browser_user_agent():
+    # Arrange / Act
+    async with create_http_client() as client:
+        # Assert
+        assert client.headers["User-Agent"] == DEFAULT_USER_AGENT
 
 
 async def test_fetch_with_retry_success(mock_client):
