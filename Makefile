@@ -7,7 +7,14 @@ test:
 	uv run ruff check .
 	uv run mypy .
 	uv run python -m pytest -sv tests/unit
-	uv run python -m pytest -sv tests --ignore=tests/unit
+	uv run python -m pytest -sv tests/integration
+
+.PHONY: test-scrape
+test-scrape:
+	uv run python -m pytest -sv tests/scrape
+
+.PHONY: test-all
+test-all: test test-scrape
 
 .PHONY: format
 format:
@@ -21,16 +28,3 @@ run-dev:
 .PHONY: up
 up:
 	docker-compose up --build
-
-DATE := $(shell date +%Y.%m.%d)
-EXISTING_TAGS := $(shell gh release list --json tagName -q '.[] | .tagName' | grep '^$(DATE)')
-
-.PHONY: create-release
-create-release:
-	@N=1; \
-	while echo "$(EXISTING_TAGS)" | grep -q "^$(DATE).$$$${N}"; do \
-		N=$$(($$N + 1)); \
-	done; \
-	TAG="$(DATE).$$N"; \
-	echo "Creating GitHub release for tag: $$TAG"; \
-	gh release create $$TAG --generate-notes

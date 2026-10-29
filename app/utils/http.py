@@ -13,6 +13,24 @@ from tenacity import (
 
 logger = logging.getLogger(__name__)
 
+# Cloudflare on tv-tokyo.co.jp returns 403 for python-httpx's default UA and for HTTP/2.
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/120.0.0.0 Safari/537.36"
+)
+
+
+def create_http_client() -> httpx.AsyncClient:
+    timeout = httpx.Timeout(10.0, connect=5.0, read=30.0)
+    limits = httpx.Limits(max_connections=100, max_keepalive_connections=20)
+
+    return httpx.AsyncClient(
+        timeout=timeout,
+        limits=limits,
+        headers={"User-Agent": DEFAULT_USER_AGENT},
+    )
+
 
 class Http5xxError(Exception):
     """Custom exception for HTTP 5xx errors."""
