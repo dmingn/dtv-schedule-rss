@@ -35,6 +35,79 @@ jobs:
       - name: Run tests
         run: make test
 
+  # Live channel scrapes can fail from GitHub-hosted runners (e.g. overseas IP
+  # blocks). Keep the results visible without blocking merge.
+  scrape:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run live scrape tests
+        id: scrape
+        run: |
+          set -o pipefail
+          make test-scrape 2>&1 | tee scrape-output.txt
+
+      - name: Upsert sticky PR comment
+        if: always() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SCRAPE_OUTCOME: ${{ steps.scrape.outcome }}
+        run: |
+          MARKER='<!-- scrape-ci-sticky -->'
+          REPO='${{ github.repository }}'
+          PR='${{ github.event.pull_request.number }}'
+          RUN_URL='${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+
+          if [ "$SCRAPE_OUTCOME" = "success" ]; then
+            HEADER='## Live scrape results: passed'
+          else
+            HEADER='## Live scrape results: failed'
+          fi
+
+          {
+            echo "$MARKER"
+            echo "$HEADER"
+            echo
+            echo "[Workflow run]($RUN_URL)"
+            echo
+            echo '```'
+            if [ -f scrape-output.txt ]; then
+              cat scrape-output.txt
+            else
+              echo '_No scrape output captured._'
+            fi
+            echo '```'
+          } > scrape-comment.md
+
+          COMMENT_ID=$(
+            gh api --paginate "repos/${REPO}/issues/${PR}/comments" \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\") | select(.body | contains(\"${MARKER}\")) | .id" \
+              | head -n1
+          )
+
+          if [ -n "$COMMENT_ID" ]; then
+            jq -n --rawfile body scrape-comment.md '{body: $body}' \
+              | gh api --method PATCH "repos/${REPO}/issues/comments/${COMMENT_ID}" --input -
+          else
+            jq -n --rawfile body scrape-comment.md '{body: $body}' \
+              | gh api --method POST "repos/${REPO}/issues/${PR}/comments" --input -
+          fi
+
   test-container:
     needs: test
     runs-on: ubuntu-latest
