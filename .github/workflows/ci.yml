@@ -79,6 +79,19 @@ jobs:
             HEADER='## Live scrape results: failed'
           fi
 
+          if [ -f scrape-output.txt ]; then
+            if grep -q 'short test summary info' scrape-output.txt; then
+              SUMMARY=$(sed -n '/short test summary info/,$p' scrape-output.txt | sed '/^make:/,$d')
+            else
+              SUMMARY=$(grep -E '^=+ .*(passed|failed|error|skipped).* =+$' scrape-output.txt | tail -n1)
+            fi
+            if [ -z "$SUMMARY" ]; then
+              SUMMARY='_No pytest summary found._'
+            fi
+          else
+            SUMMARY='_No scrape output captured._'
+          fi
+
           {
             echo "$MARKER"
             echo "$HEADER"
@@ -86,11 +99,7 @@ jobs:
             echo "[Workflow run]($RUN_URL)"
             echo
             echo '```'
-            if [ -f scrape-output.txt ]; then
-              cat scrape-output.txt
-            else
-              echo '_No scrape output captured._'
-            fi
+            echo "$SUMMARY"
             echo '```'
           } > scrape-comment.md
 
