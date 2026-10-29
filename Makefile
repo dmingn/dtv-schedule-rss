@@ -7,7 +7,14 @@ test:
 	uv run ruff check .
 	uv run mypy .
 	uv run python -m pytest -sv tests/unit
-	uv run python -m pytest -sv tests --ignore=tests/unit
+	uv run python -m pytest -sv tests/integration
+
+.PHONY: test-scrape
+test-scrape:
+	uv run python -m pytest -sv tests/scrape
+
+.PHONY: test-all
+test-all: test test-scrape
 
 .PHONY: format
 format:
