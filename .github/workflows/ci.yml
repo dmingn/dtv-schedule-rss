@@ -96,6 +96,8 @@ jobs:
             echo "$MARKER"
             echo "$HEADER"
             echo
+            echo "TV Asahi (\`joex-dtv\`) is known to return \`406 Not Acceptable\` in CI. If it fails here, confirm with \`make test-scrape\` locally before treating it as a real regression."
+            echo
             echo "[Workflow run]($RUN_URL)"
             echo
             echo '```'
